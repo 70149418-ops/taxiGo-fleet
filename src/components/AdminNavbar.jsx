@@ -55,6 +55,8 @@ export const AdminNavbar = ({ handleLogoutAction }) => {
         {!isMobile ? (
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
             <Link to="/admin" style={linkStyle("admin")} onMouseEnter={() => setHoveredLink("admin")} onMouseLeave={() => setHoveredLink(null)}>System Analytics</Link>
+            {/* Added Live Chat Operator Gateway */}
+            <Link to="/chat" style={linkStyle("chat")} onMouseEnter={() => setHoveredLink("chat")} onMouseLeave={() => setHoveredLink(null)}>Live Chat</Link>
             
             <span style={{ color: "#ffffff", fontSize: "13px", fontWeight: "600", backgroundColor: "#222222", padding: "6px 14px", borderRadius: "20px", border: "1px solid #ffdd00" }}>
               💼 Admin Mode
@@ -80,7 +82,9 @@ export const AdminNavbar = ({ handleLogoutAction }) => {
           <p style={{ margin: 0, color: "#ffdd00", fontSize: "15px", fontWeight: "700" }}>💼 Admin Console</p>
         </div>
         <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} style={linkStyle("admin", true)} onMouseEnter={() => setHoveredLink("admin")} onMouseLeave={() => setHoveredLink(null)}>📈 System Analytics</Link>
-        <button onClick={handleLogoutAction} style={{ background: "#ffffff", color: "#111111", border: "none", padding: "14px", borderRadius: "10px", fontWeight: "700", fontSize: "14px", cursor: "pointer", marginTop: "auto" }}>Sign Out Terminal</button>
+        {/* Added Mobile Chat Option */}
+        <Link to="/chat" onClick={() => setIsMobileMenuOpen(false)} style={linkStyle("chat", true)} onMouseEnter={() => setHoveredLink("chat")} onMouseLeave={() => setHoveredLink(null)}>💬 Live Chat Terminal</Link>
+        <button onClick={handleLogoutAction} style={{ background: "#ffffff", color: "#111111", border: "none", padding: "14px", borderRadius: "10px", fontWeight: "700", fontSize: "14px", cursor: "pointer", marginTop: "auto" }}>Sign Out</button>
       </div>
       {isMobileMenuOpen && <div onClick={() => setIsMobileMenuOpen(false)} style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(5px)", zIndex: 998 }} />}
     </>

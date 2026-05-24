@@ -30,12 +30,14 @@ export const BookingDetail = () => {
   if (loading) {
     return (
       <div style={{ 
+        width: "90%",
         maxWidth: "650px", 
         margin: "60px auto", 
-        padding: "40px", 
+        padding: "40px 20px", 
         textAlign: "center",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-        color: "#666666"
+        color: "#666666",
+        boxSizing: "border-box"
       }}>
         <div className="pulse-loader" style={{
           width: "50px", height: "50px", border: "4px solid #f3f3f3", borderTop: "4px solid #111111", 
@@ -53,9 +55,11 @@ export const BookingDetail = () => {
   if (!booking) {
     return (
       <div style={{ 
-        maxWidth: "650px", margin: "60px auto", padding: "40px", textAlign: "center",
+        width: "90%",
+        maxWidth: "650px", margin: "60px auto", padding: "40px 20px", textAlign: "center",
         backgroundColor: "#ffffff", borderRadius: "20px", border: "1px solid #eaeaea",
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        boxSizing: "border-box"
       }}>
         <span style={{ fontSize: "48px", display: "block", marginBottom: "16px" }}>⚠️</span>
         <h3 style={{ margin: "0 0 10px 0", fontWeight: "800", color: "#111111" }}>Record Payload Missing</h3>
@@ -82,8 +86,9 @@ export const BookingDetail = () => {
 
   return (
     <div style={{ 
+      width: "calc(100% - 32px)",
       maxWidth: "650px", 
-      margin: "50px auto", 
+      margin: "30px auto", 
       backgroundColor: "#ffffff", 
       borderRadius: "24px", 
       border: "1px solid #eaeaea",
@@ -92,9 +97,60 @@ export const BookingDetail = () => {
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       color: "#111111",
       boxSizing: "border-box"
-    }}>
+    }} className="receipt-container">
+      
+      {/* 📱 Mobile CSS Injection */}
+      <style>{`
+        @media (max-width: 680px) {
+          .receipt-container {
+            margin: 16px auto !important;
+            border-radius: 16px !important;
+          }
+          .header-ribbon {
+            padding: 20px 20px 0 20px !important;
+          }
+          .passport-header-block {
+            padding: 20px !important;
+          }
+          .passport-flex-wrapper {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+          }
+          .status-badge {
+            align-self: flex-start !important;
+          }
+          .transaction-id-wrapper {
+            word-break: break-all !important;
+            white-space: normal !important;
+          }
+          .metadata-matrix-body {
+            padding: 20px !important;
+          }
+          .data-ledger-row {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 6px !important;
+            padding-bottom: 14px !important;
+          }
+          .data-ledger-row span:last-child {
+            word-break: break-all !important;
+          }
+          .fare-total-panel {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            padding: 16px !important;
+          }
+          .security-footer {
+            padding: 16px 20px !important;
+            font-size: 11px !important;
+          }
+        }
+      `}</style>
+
       {/* Top Interactive Controls Ribbon */}
-      <div style={{ padding: "24px 32px 0 32px" }}>
+      <div className="header-ribbon" style={{ padding: "24px 32px 0 32px" }}>
         <button 
           onClick={() => navigate("/dashboard")} 
           onMouseEnter={() => setIsBackHovered(true)}
@@ -119,24 +175,24 @@ export const BookingDetail = () => {
       </div>
 
       {/* Ticket Passport Header Block */}
-      <div style={{ 
+      <div className="passport-header-block" style={{ 
         padding: "24px 32px", 
         borderBottom: "1px dashed #e0e0e0", 
         backgroundColor: "#ffffff",
         position: "relative" 
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className="passport-flex-wrapper" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "800", letterSpacing: "-0.5px" }}>
               Ride Receipt Registry
             </h2>
-            <div style={{ marginTop: "6px", fontSize: "12px", color: "#888888", fontWeight: "500" }}>
+            <div className="transaction-id-wrapper" style={{ marginTop: "6px", fontSize: "12px", color: "#888888", fontWeight: "500" }}>
               TRANSACTION ID: <span style={{ color: "#111111", fontFamily: "monospace", fontSize: "13px", fontWeight: "700" }}>{id}</span>
             </div>
           </div>
           
           {/* Dynamic Floating Badging Indicator */}
-          <span style={{ 
+          <span className="status-badge" style={{ 
             padding: "8px 14px", 
             borderRadius: "20px", 
             fontSize: "11px", 
@@ -144,7 +200,8 @@ export const BookingDetail = () => {
             letterSpacing: "0.5px",
             textTransform: "uppercase",
             backgroundColor: statusStyle.bg, 
-            color: statusStyle.text
+            color: statusStyle.text,
+            whiteSpace: "nowrap"
           }}>
             ● {booking.status || "Pending"}
           </span>
@@ -156,7 +213,7 @@ export const BookingDetail = () => {
       </div>
 
       {/* Primary Invoiced Metadata Parameters Matrix */}
-      <div style={{ padding: "32px", backgroundColor: "#ffffff" }}>
+      <div className="metadata-matrix-body" style={{ padding: "32px", backgroundColor: "#ffffff" }}>
         
         {/* Geolocation Transit Route Vector Node Block */}
         <div style={{ 
@@ -185,23 +242,23 @@ export const BookingDetail = () => {
         {/* Structured Data Ledger Metrics List */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f5f5f5", paddingBottom: "12px" }}>
+          <div className="data-ledger-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f5f5f5", paddingBottom: "12px" }}>
             <span style={{ fontSize: "14px", color: "#666666", fontWeight: "500" }}>Fleet Category Assigned</span>
             <span style={{ fontSize: "14px", fontWeight: "700", color: "#111111" }}>🚗 {booking.carType}</span>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f5f5f5", paddingBottom: "12px" }}>
+          <div className="data-ledger-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f5f5f5", paddingBottom: "12px" }}>
             <span style={{ fontSize: "14px", color: "#666666", fontWeight: "500" }}>Transit Duration Estimate</span>
             <span style={{ fontSize: "14px", fontWeight: "700", color: "#111111" }}>⏱️ {booking.estimatedTime || "Calculated at Dispatch"}</span>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f5f5f5", paddingBottom: "12px" }}>
+          <div className="data-ledger-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f5f5f5", paddingBottom: "12px" }}>
             <span style={{ fontSize: "14px", color: "#666666", fontWeight: "500" }}>Account Identity Profile</span>
             <span style={{ fontSize: "13px", fontWeight: "600", color: "#555555", fontFamily: "monospace" }}>👤 {activeEmailDisplay}</span>
           </div>
 
           {/* Grand Highlighted Total Fare Panel */}
-          <div style={{ 
+          <div className="fare-total-panel" style={{ 
             display: "flex", 
             justifyContent: "space-between", 
             alignItems: "center", 
@@ -219,7 +276,7 @@ export const BookingDetail = () => {
       </div>
 
       {/* Decorative Security Watermark Footer */}
-      <div style={{ 
+      <div className="security-footer" style={{ 
         backgroundColor: "#111111", 
         padding: "16px 32px", 
         textAlign: "center", 

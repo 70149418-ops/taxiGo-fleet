@@ -8,6 +8,9 @@ export const ChatRoom = () => {
   const [userDirectory, setUserDirectory] = useState([]);
   const [activeChatId, setActiveChatId] = useState("global_operations_lounge");
   
+  // Mobile-View Screen State Control
+  const [isMobileChatActive, setIsMobileChatActive] = useState(false);
+
   // Micro-interactive component visual hook selectors
   const [hoveredChannel, setHoveredChannel] = useState(null);
   const [isSubmitHovered, setIsSubmitHovered] = useState(false);
@@ -15,6 +18,7 @@ export const ChatRoom = () => {
 
   // Helper function to extract user handle names safely
   const formatName = (profile) => {
+    if (!profile) return "User Profile";
     if (profile.name) return profile.name;
     if (profile.email) {
       return profile.email.split("@")[0]
@@ -29,9 +33,10 @@ export const ChatRoom = () => {
     const downloadSystemUsers = async () => {
       try {
         const usersSnapshot = await getDocs(collection(db, "users"));
+        const currentUid = auth.currentUser?.uid;
         const activeProfiles = usersSnapshot.docs
           .map(doc => doc.data())
-          .filter(profile => profile.uid !== auth.currentUser?.uid);
+          .filter(profile => profile && profile.uid && profile.uid !== currentUid);
         setUserDirectory(activeProfiles);
       } catch (err) {
         console.error("Directory reading issue:", err);
@@ -42,13 +47,18 @@ export const ChatRoom = () => {
 
   // Sync real-time messaging collections node streams
   useEffect(() => {
+    console.log(`[ChatRoom Engine] Connecting stream for Room ID: ${activeChatId}`);
+    
     const messageStreamQuery = query(
       collection(db, "chats", activeChatId, "messages"),
       orderBy("timestamp", "asc")
     );
 
     const closeLiveConnection = onSnapshot(messageStreamQuery, (querySnapshot) => {
-      setMessages(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const incoming = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setMessages(incoming);
+    }, (error) => {
+      console.error("Live listener pipeline blocked by Firestore rules or network drop:", error);
     });
 
     return () => closeLiveConnection();
@@ -63,22 +73,48 @@ export const ChatRoom = () => {
     e.preventDefault();
     if (!input.trim()) return;
 
+    // 🚀 CRITICAL FIX: Ensure user context is present before attempting write payload
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      console.error("Write aborted: User is not logged in or Firebase auth context dropped.");
+      return;
+    }
+
     try {
-      const currentSenderName = auth.currentUser.displayName || auth.currentUser.email.split("@")[0];
+      const currentSenderName = currentUser.displayName || currentUser.email?.split("@")[0] || "User";
+      
       await addDoc(collection(db, "chats", activeChatId, "messages"), {
-        text: input,
-        senderId: auth.currentUser.uid,
+        text: input.trim(),
+        senderId: currentUser.uid,
         senderName: currentSenderName.replace(/[._-]/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp() // Triggers real-time stream listener update instantly upon generation
       });
+
       setInput("");
     } catch (err) {
-      console.error("Message delivery failed:", err);
+      console.error("Message delivery failed directly at Firestore collection writing junction:", err);
     }
   };
 
+  // 🚀 CRITICAL REPAIR: Unifies structural dynamic Room ID generation safely
+  const handleChannelSwitch = (targetChannel) => {
+    if (targetChannel === "global_operations_lounge") {
+      setActiveChatId("global_operations_lounge");
+    } else {
+      const currentUid = auth.currentUser?.uid;
+      if (!currentUid) {
+        console.warn("Cannot initialize secure private channel: Current User Auth state is null.");
+        return;
+      }
+      // Generate clean, deterministic sorted unique room IDs consistently
+      const generatedRoomId = [currentUid, targetChannel].sort().join("___");
+      setActiveChatId(generatedRoomId);
+    }
+    setIsMobileChatActive(true); // Transitions viewport window smoothly for smartphones
+  };
+
   return (
-    <div style={{ 
+    <div className="chatroom-main-wrapper" style={{ 
       display: "flex", 
       height: "650px", 
       backgroundColor: "#ffffff", 
@@ -87,19 +123,24 @@ export const ChatRoom = () => {
       boxShadow: "0 12px 40px rgba(0,0,0,0.03)", 
       overflow: "hidden", 
       color: "#111111",
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      width: "100%",
+      boxSizing: "border-box"
     }}>
       
       {/* 1. Left Channel Sidebar Navigation Stack Container */}
-      <div style={{ 
-        width: "32%", 
-        backgroundColor: "#fafafa", 
-        borderRight: "1px solid #eaeaea", 
-        padding: "24px 16px", 
-        display: "flex", 
-        flexDirection: "column",
-        boxSizing: "border-box"
-      }}>
+      <div 
+        className={`chat-sidebar-panel ${isMobileChatActive ? "mobile-hidden" : "mobile-visible"}`}
+        style={{ 
+          width: "32%", 
+          backgroundColor: "#fafafa", 
+          borderRight: "1px solid #eaeaea", 
+          padding: "24px 16px", 
+          display: "flex", 
+          flexDirection: "column",
+          boxSizing: "border-box"
+        }}
+      >
         <h3 style={{ 
           marginTop: 0, 
           fontSize: "18px", 
@@ -111,12 +152,12 @@ export const ChatRoom = () => {
           gap: "8px",
           marginBottom: "20px"
         }}>
-          <span>🚖</span> taxiGo Lounge Hub
+          <span>🚖</span> taxiGo ChatBox
         </h3>
 
         {/* Global Dispatch Broadcast Channel Node Wrapper */}
         <div 
-          onClick={() => setActiveChatId("global_operations_lounge")}
+          onClick={() => handleChannelSwitch("global_operations_lounge")}
           onMouseEnter={() => setHoveredChannel("global")}
           onMouseLeave={() => setHoveredChannel(null)}
           style={{ 
@@ -156,12 +197,13 @@ export const ChatRoom = () => {
           paddingRight: "4px"
         }} className="custom-chat-scrollbar">
           {userDirectory.map((u) => {
+            if (!u || !u.uid) return null;
             const isSelected = activeChatId.includes(u.uid);
             const userInitials = formatName(u).substring(0, 2).toUpperCase();
             return (
               <div 
                 key={u.uid}
-                onClick={() => setActiveChatId([auth.currentUser.uid, u.uid].sort().join("___"))}
+                onClick={() => handleChannelSwitch(u.uid)} // Passes the unique target ID into our engine clean
                 onMouseEnter={() => setHoveredChannel(u.uid)}
                 onMouseLeave={() => setHoveredChannel(null)}
                 style={{ 
@@ -199,7 +241,7 @@ export const ChatRoom = () => {
                     {formatName(u)}
                   </div>
                   <div style={{ fontSize: "11px", color: isSelected ? "#856404" : "#777777", fontWeight: "500", marginTop: "2px" }}>
-                    💼 Class: <span style={{ textTransform: "capitalize" }}>{u.role}</span>
+                    💼 Class: <span style={{ textTransform: "capitalize" }}>{u.role || "member"}</span>
                   </div>
                 </div>
               </div>
@@ -209,7 +251,16 @@ export const ChatRoom = () => {
       </div>
 
       {/* 2. Right Interactive Workspace Console Dialogue System Pane */}
-      <div style={{ width: "68%", display: "flex", flexDirection: "column", backgroundColor: "#ffffff" }}>
+      <div 
+        className={`chat-workspace-console ${isMobileChatActive ? "mobile-visible" : "mobile-hidden"}`}
+        style={{ 
+          width: "68%", 
+          display: "flex", 
+          flexDirection: "column", 
+          backgroundColor: "#ffffff",
+          boxSizing: "border-box"
+        }}
+      >
         
         {/* Workspace Sub-Header Top Node */}
         <div style={{ 
@@ -218,15 +269,37 @@ export const ChatRoom = () => {
           borderBottom: "1px solid #eaeaea", 
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
           gap: "10px"
         }}>
-          <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#00c853" }}></div>
-          <div style={{ fontSize: "14px", fontWeight: "700", color: "#666666" }}>
-            Operational Node: {" "}
-            <span style={{ color: "#111111", fontWeight: "800" }}>
-              {activeChatId === "global_operations_lounge" ? "🌐 Global Broadcast Network" : "🔒 Secure Direct Connection Line"}
-            </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", overflow: "hidden" }}>
+            <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#00c853", flexShrink: 0 }}></div>
+            <div style={{ fontSize: "14px", fontWeight: "700", color: "#666666", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+              Operational Node: {" "}
+              <span style={{ color: "#111111", fontWeight: "800" }}>
+                {activeChatId === "global_operations_lounge" ? "🌐 Global Broadcast" : "🔒 Secure Direct Line"}
+              </span>
+            </div>
           </div>
+          
+          {/* Mobile Navigation Trigger link */}
+          <button 
+            className="mobile-back-button"
+            onClick={() => setIsMobileChatActive(false)}
+            style={{
+              display: "none",
+              padding: "6px 12px",
+              background: "#111111",
+              color: "#ffdd00",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "12px",
+              fontWeight: "700",
+              cursor: "pointer"
+            }}
+          >
+            ← Directory
+          </button>
         </div>
 
         {/* 3. Live Log View Messages Array Container */}
@@ -237,10 +310,11 @@ export const ChatRoom = () => {
           backgroundColor: "#fcfcfc",
           display: "flex",
           flexDirection: "column",
-          gap: "16px"
+          gap: "16px",
+          boxSizing: "border-box"
         }} className="custom-chat-scrollbar">
           {messages.map((m) => {
-            const isMe = m.senderId === auth.currentUser.uid;
+            const isMe = m.senderId === auth.currentUser?.uid;
             return (
               <div 
                 key={m.id} 
@@ -261,7 +335,7 @@ export const ChatRoom = () => {
                   marginRight: isMe ? "4px" : "0",
                   marginLeft: isMe ? "0" : "4px"
                 }}>
-                  {m.senderName}
+                  {m.senderName || "System Profile"}
                 </span>
 
                 {/* Micro Dialogue Speech Bubble Component Mapping */}
@@ -270,7 +344,7 @@ export const ChatRoom = () => {
                   color: "#111111", 
                   padding: "12px 18px", 
                   borderRadius: isMe ? "18px 18px 2px 18px" : "18px 18px 18px 2px", 
-                  maxWidth: "65%", 
+                  maxWidth: "80%", 
                   fontSize: "14px",
                   fontWeight: "500",
                   lineHeight: "1.5",
@@ -295,12 +369,13 @@ export const ChatRoom = () => {
             display: "flex", 
             backgroundColor: "#ffffff",
             alignItems: "center",
-            gap: "12px"
+            gap: "12px",
+            boxSizing: "border-box"
           }}
         >
           <input 
             type="text" 
-            placeholder="Write an operational broadcast message or answer client logs..." 
+            placeholder="Write an operational broadcast message..." 
             value={input} 
             onChange={(e) => setInput(e.target.value)} 
             style={{ 
@@ -313,7 +388,9 @@ export const ChatRoom = () => {
               fontWeight: "500",
               backgroundColor: "#fafafa",
               transition: "all 0.2s ease",
-              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+              width: "100%",
+              boxSizing: "border-box"
             }} 
             onFocus={(e) => {
               e.target.style.border = "1px solid #111111";
@@ -329,7 +406,7 @@ export const ChatRoom = () => {
             onMouseEnter={() => setIsSubmitHovered(true)}
             onMouseLeave={() => setIsSubmitHovered(false)}
             style={{ 
-              padding: "14px 28px", 
+              padding: "14px 24px", 
               backgroundColor: isSubmitHovered ? "#ffdd00" : "#111111", 
               color: isSubmitHovered ? "#111111" : "#ffdd00", 
               border: "none", 
@@ -339,15 +416,16 @@ export const ChatRoom = () => {
               cursor: "pointer",
               transition: "all 0.2s ease-in-out",
               boxShadow: isSubmitHovered ? "0 4px 14px rgba(255,221,0,0.3)" : "none",
-              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+              whiteSpace: "nowrap"
             }}
           >
-            Send Terminal ↗
+            Send ↗
           </button>
         </form>
       </div>
 
-      {/* Global CSS Injector Rule Sub-Engine Block for Clean View Scrollers */}
+      {/* Global CSS Injector Rule Sub-Engine Block for Mobile Responsiveness & Scrollers */}
       <style>{`
         .custom-chat-scrollbar::-webkit-scrollbar {
           width: 6px;
@@ -361,6 +439,23 @@ export const ChatRoom = () => {
         }
         .custom-chat-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #cccccc;
+        }
+
+        @media (max-width: 768px) {
+          .chatroom-main-wrapper {
+            height: 80vh !important;
+            border-radius: 12px !important;
+          }
+          .mobile-hidden {
+            display: none !important;
+          }
+          .mobile-visible {
+            display: flex !important;
+            width: 100% !important;
+          }
+          .mobile-back-button {
+            display: block !important;
+          }
         }
       `}</style>
     </div>

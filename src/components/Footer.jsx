@@ -99,9 +99,6 @@ export const Footer = () => {
         <p style={{ margin: "0 0 6px 0", fontSize: "13px", color: "#aaaaaa", fontWeight: "400" }}>
           © {new Date().getFullYear()} <strong style={{ color: "#ffffff" }}>taxiGo Systems</strong>. All rights reserved globally.
         </p>
-        <p style={{ fontSize: "11px", color: "#666666", margin: 0, letterSpacing: "0.3px" }}>
-          Project Scope Module built for Web Engineering Assignment 04 • The University of Lahore
-        </p>
       </div>
     </footer>
   );

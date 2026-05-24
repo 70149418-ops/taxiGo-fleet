@@ -44,14 +44,15 @@ export const UserDashboard = () => {
   return (
     <div style={{ 
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-      backgroundColor: "#0d0d0d", // Dark canvas background layer
+      backgroundColor: "#0d0d0d", 
       color: "#ffffff",
       boxSizing: "border-box",
       padding: "40px 32px",
       minHeight: "100vh",
       width: "100%"
-    }}>
-      {/* Dynamic Structural Style Overrides to Guarantee Full Bleed Container Expansion */}
+    }} className="dashboard-container-wrapper">
+      
+      {/* 🚀 Dynamic Responsive Styles & Media Overrides */}
       <style>{`
         html, body, #root, .container, [class*="layout"] {
           background-color: #0d0d0d !important;
@@ -61,10 +62,101 @@ export const UserDashboard = () => {
           margin: 0 !important;
           box-sizing: border-box !important;
         }
+
+        @keyframes darkPulse {
+          0% { opacity: 0.4; background-color: #161616; }
+          50% { opacity: 0.8; background-color: #222222; }
+          100% { opacity: 0.4; background-color: #161616; }
+        }
+
+        /* Responsive Breakpoint for Tablets and Smartphones */
+        @media (max-width: 768px) {
+          .dashboard-container-wrapper {
+            padding: 20px 16px !important;
+          }
+          
+          .dashboard-header-block {
+            padding: 24px 20px !important;
+            marginBottom: 20px !important;
+          }
+
+          .dashboard-header-block h2 {
+            font-size: 20px !important;
+          }
+
+          .dashboard-grid-matrix {
+            gap: 20px !important;
+          }
+
+          .dashboard-ledger-card {
+            padding: 20px 16px !important;
+          }
+
+          /* 🚀 Table to Adaptive Mobile Card Layout Transformation */
+          .responsive-data-table, 
+          .responsive-data-table thead, 
+          .responsive-data-table tbody, 
+          .responsive-data-table th, 
+          .responsive-data-table td, 
+          .responsive-data-table tr { 
+            display: block; 
+            width: 100%;
+          }
+          
+          .responsive-data-table thead {
+            display: none; /* Hide column headers on mobile */
+          }
+          
+          .responsive-data-table tr {
+            background-color: #161616 !important;
+            border: 1px solid #222222 !important;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            padding: 16px;
+            box-sizing: border-box;
+          }
+
+          .responsive-data-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0 !important;
+            border-bottom: 1px solid #222222;
+          }
+
+          .responsive-data-table td:last-child {
+            border-bottom: none;
+            padding-top: 14px !important;
+            justify-content: flex-end !important;
+          }
+
+          /* Inject Label Headers Before Values on Mobile viewports */
+          .responsive-data-table td::before {
+            content: attr(data-label);
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #666666;
+            letter-spacing: 0.5px;
+          }
+
+          /* Reset spacing alignments optimized for vertical card rows */
+          .responsive-data-table td:first-child {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .responsive-data-table td:first-child::before {
+            margin-bottom: 6px;
+          }
+          .responsive-data-table td fieldset,
+          .responsive-data-table td div {
+            text-align: left;
+          }
+        }
       `}</style>
 
       {/* Top Welcome Header Panel */}
-      <div style={{ 
+      <div className="dashboard-header-block" style={{ 
         background: "#111111", 
         color: "#ffffff", 
         padding: "32px", 
@@ -81,7 +173,7 @@ export const UserDashboard = () => {
         </p>
       </div>
 
-      {/* Dynamic System Action Notifications (Re-styled to premium dark alert cards) */}
+      {/* Dynamic System Action Notifications */}
       {actionMessage && (
         <div style={{ 
           padding: "16px 20px", 
@@ -102,29 +194,31 @@ export const UserDashboard = () => {
       )}
 
       {/* Main Grid Content Matrix Workspace */}
-      <div style={{ 
+      <div className="dashboard-grid-matrix" style={{ 
         display: "flex", 
         flexWrap: "wrap",
         gap: "32px",
         width: "100%"
       }}>
-        {/* Left Workspace Block: Modular Creation Component Form */}
+        {/* Left Workspace Block: Creation Form Component */}
         <div style={{ 
           flex: "1 1 380px",
-          boxSizing: "border-box"
+          boxSizing: "border-box",
+          width: "100%"
         }}>
           <BookingForm onBookingSuccess={loadDataRecords} />
         </div>
 
-        {/* Right Workspace Block: Dynamic History Ledger Records Logs Table */}
-        <div style={{ 
+        {/* Right Workspace Block: History Ledger Records Logs Table */}
+        <div className="dashboard-ledger-card" style={{ 
           flex: "2 1 650px",
-          background: "#111111", // Deep dark table backdrop block
+          background: "#111111", 
           padding: "32px", 
           borderRadius: "12px", 
           border: "1px solid #1a1a1a",
           boxShadow: "0 4px 25px rgba(0,0,0,0.3)",
-          boxSizing: "border-box"
+          boxSizing: "border-box",
+          width: "100%"
         }}>
           <div style={{ display: "block", marginBottom: "24px", borderBottom: "1px solid #222222", paddingBottom: "16px" }}>
             <h3 style={{ 
@@ -153,13 +247,6 @@ export const UserDashboard = () => {
                   animation: "darkPulse 1.8s infinite ease-in-out" 
                 }} />
               ))}
-              <style>{`
-                @keyframes darkPulse {
-                  0% { opacity: 0.4; background-color: #161616; }
-                  50% { opacity: 0.8; background-color: #222222; }
-                  100% { opacity: 0.4; background-color: #161616; }
-                }
-              `}</style>
             </div>
           ) : bookings.length === 0 ? (
             <div style={{ 
@@ -173,9 +260,9 @@ export const UserDashboard = () => {
               No bookings logged yet. Submit the left form to request your first taxiGo entry!
             </div>
           ) : (
-            /* Modern Full-Bleed Dark Data Table Layout */
+            /* Responsive Adaptive Data Grid Layout */
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "14px" }}>
+              <table className="responsive-data-table" style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "14px" }}>
                 <thead>
                   <tr style={{ borderBottom: "2px solid #222222", color: "#666666" }}>
                     <th style={{ padding: "14px 12px", fontWeight: "700", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>Route Parameters</th>
@@ -197,8 +284,8 @@ export const UserDashboard = () => {
                       onMouseEnter={() => setHoveredRow(b.id)}
                       onMouseLeave={() => setHoveredRow(null)}
                     >
-                      {/* Geolocation Parameters */}
-                      <td style={{ padding: "16px 12px" }}>
+                      {/* data-label provides the card identifier title string dynamically on smaller mobile Viewports */}
+                      <td data-label="Route Parameters" style={{ padding: "16px 12px" }}>
                         <div style={{ fontWeight: "700", color: "#ffffff", marginBottom: "4px", fontSize: "14px" }}>
                           📍 {b.pickup}
                         </div>
@@ -207,16 +294,15 @@ export const UserDashboard = () => {
                         </div>
                       </td>
                       
-                      <td style={{ padding: "16px 12px", color: "#cccccc", fontWeight: "600" }}>
+                      <td data-label="Fleet Class" style={{ padding: "16px 12px", color: "#cccccc", fontWeight: "600" }}>
                         {b.carType}
                       </td>
                       
-                      <td style={{ padding: "16px 12px", fontWeight: "800", color: "#ffdd00" }}>
+                      <td data-label="Est. Fare" style={{ padding: "16px 12px", fontWeight: "800", color: "#ffdd00" }}>
                         PKR {Number(b.fare || 0).toLocaleString()}
                       </td>
                       
-                      {/* Premium Dark Semantic Status Badges */}
-                      <td style={{ padding: "16px 12px" }}>
+                      <td data-label="Status" style={{ padding: "16px 12px" }}>
                         <span style={{ 
                           padding: "6px 14px", 
                           borderRadius: "6px", 
@@ -232,8 +318,7 @@ export const UserDashboard = () => {
                         </span>
                       </td>
                       
-                      {/* Interactive Actions Grid */}
-                      <td style={{ padding: "16px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
+                      <td data-label="Actions" style={{ padding: "16px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
                         <button 
                           onClick={() => navigate(`/booking/${b.id}`)} 
                           onMouseEnter={() => setHoveredBtn(`view-${b.id}`)}

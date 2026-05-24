@@ -12,6 +12,9 @@ export const Navbar = () => {
 
   // Hover states for professional UI micro-interactions
   const [hoveredLink, setHoveredLink] = useState(null);
+  
+  // Track open/close toggle state for smaller viewport menu triggers
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isSecureRoute = ["/dashboard", "/chat", "/admin", "/booking"].some(path => 
     location.pathname.startsWith(path)
@@ -57,9 +60,45 @@ export const Navbar = () => {
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         position: "relative",
         zIndex: 1000
-      }}>
+      }} className="public-navbar-container">
+        
+        {/* 📱 Mobile CSS Injection */}
+        <style>{`
+          @media (max-width: 768px) {
+            .public-navbar-container {
+              padding: 14px 20px !important;
+            }
+            .nav-actions-wrapper {
+              display: ${isMobileMenuOpen ? "flex" : "none"} !important;
+              flex-direction: column !important;
+              position: absolute !important;
+              top: 100% !important;
+              left: 0 !important;
+              width: 100% !important;
+              background-color: #111111 !important;
+              border-bottom: 1px solid #1a1a1a !important;
+              padding: 20px !important;
+              box-sizing: border-box !important;
+              gap: 20px !important;
+              align-items: stretch !important;
+              box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+            }
+            .nav-actions-wrapper a {
+              text-align: center !important;
+              width: 100% !important;
+              box-sizing: border-box !important;
+            }
+            .mobile-menu-trigger {
+              display: flex !important;
+            }
+            .brand-identifier span {
+              display: none !important; /* Conditionally compact text for smaller screen bounds */
+            }
+          }
+        `}</style>
+
         {/* Modern high-contrast brand identifier */}
-        <Link to="/" style={{ 
+        <Link to="/" className="brand-identifier" style={{ 
           color: "#ffffff", 
           textDecoration: "none", 
           fontSize: "21px", 
@@ -83,10 +122,34 @@ export const Navbar = () => {
           }}>Secure Portal</span>
         </Link>
 
+        {/* Hamburger Mobile Toggle Trigger */}
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="mobile-menu-trigger"
+          style={{
+            display: "none",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            width: "22px",
+            height: "16px",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            padding: 0,
+            boxSizing: "border-box",
+            outline: "none"
+          }}
+        >
+          <span style={{ width: "100%", height: "2px", backgroundColor: "#ffffff", transition: "all 0.2s" }}></span>
+          <span style={{ width: "100%", height: "2px", backgroundColor: isMobileMenuOpen ? "transparent" : "#ffffff", transition: "all 0.2s" }}></span>
+          <span style={{ width: "100%", height: "2px", backgroundColor: "#ffffff", transition: "all 0.2s" }}></span>
+        </button>
+
         {/* Clean right side interactive action links wrapper */}
-        <div style={{ display: "flex", gap: "28px", alignItems: "center" }}>
+        <div className="nav-actions-wrapper" style={{ display: "flex", gap: "28px", alignItems: "center" }}>
           <Link 
             to="/login" 
+            onClick={() => setIsMobileMenuOpen(false)}
             onMouseEnter={() => setHoveredLink("login")}
             onMouseLeave={() => setHoveredLink(null)}
             style={{ 
@@ -103,6 +166,7 @@ export const Navbar = () => {
 
           <Link 
             to="/register" 
+            onClick={() => setIsMobileMenuOpen(false)}
             onMouseEnter={() => setHoveredLink("signup")}
             onMouseLeave={() => setHoveredLink(null)}
             style={{ 

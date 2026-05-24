@@ -74,7 +74,7 @@ export const BookingForm = ({ onBookingSuccess }) => {
 
   return (
     <div style={{ 
-      background: "#111111", // Solid rich matching black container background block
+      background: "#111111", 
       padding: "32px", 
       borderRadius: "12px", 
       border: "1px solid #1a1a1a",
@@ -82,7 +82,22 @@ export const BookingForm = ({ onBookingSuccess }) => {
       color: "#ffffff",
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       boxSizing: "border-box"
-    }}>
+    }} className="responsive-form-card">
+      
+      {/* 📱 Mobile CSS Injection */}
+      <style>{`
+        @media (max-width: 480px) {
+          .responsive-form-card {
+            padding: 20px !important;
+            border-radius: 12px !important;
+          }
+          .responsive-form-card h3 {
+            font-size: 16px !important;
+            margin-bottom: 20px !important;
+          }
+        }
+      `}</style>
+
       <h3 style={{ 
         marginTop: 0, 
         fontSize: "18px",
@@ -166,7 +181,6 @@ export const BookingForm = ({ onBookingSuccess }) => {
                 paddingRight: "40px"
               }}
             >
-              {/* Added explicit matching background styles to the option dropdown values */}
               <option value="Standard Eco" style={{ background: "#111111", color: "#ffffff" }}>Standard Eco (🚖 Suzuki Alto / WagonR)</option>
               <option value="Executive Sedan" style={{ background: "#111111", color: "#ffffff" }}>Executive Sedan (🚘 Honda Civic / Corolla)</option>
               <option value="TaxiGo Mini Box" style={{ background: "#111111", color: "#ffffff" }}>TaxiGo Mini Box (🚗 Rickshaw / Bike Fleet)</option>
