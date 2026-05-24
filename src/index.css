@@ -1,0 +1,63 @@
+/* src/index.css */
+
+/* 1. Import the premium 'Inter' font family from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* 2. Apply a clean modern CSS reset to the entire document root */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  background-color: #f8f9fa; /* Subtle light background for a premium app feel */
+  overflow-x: hidden !important; /* Prevents awkward horizontal layout scrolling */
+  box-sizing: border-box !important;
+  
+  /* Prioritizes 'Inter' with modern system fallbacks */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 3. Global safety guard for element sizing */
+*, *:before, *:after {
+  box-sizing: inherit !important;
+}
+
+/* 4. Ensure the React root element spans perfectly without margin restrictions */
+#root {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 5. Force form elements and buttons to inherit the premium typography automatically */
+input, select, textarea, button, code {
+  font-family: inherit !important;
+}
+
+/* 6. Optional: Premium styling defaults for text headings across the app */
+h1, h2, h3, h4, h5, h6 {
+  color: #111111;
+  letter-spacing: -0.5px; /* Slight tight tracking for a tech-startup look */
+}
+
+/* Force any layout container or wrapper across the app to stretch full screen width */
+body, #root, .app, .container, [class*="container"], main {
+  width: 100% !important;
+  max-width: 100vw !important;
+  min-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #0d0d0d !important; /* Forces the remaining white areas to turn pitch black */
+}
+
+/* Strips out native container grid constraints */
+.container {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+}

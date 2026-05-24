@@ -1,0 +1,19 @@
+/* src/index.css or src/App.css */
+
+/* 1. Erase all native user-agent layout offset defaults */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  background-color: #f4f6f9; /* Matches your core background tone */
+  overflow-x: hidden;        /* Prevents horizontal layout glitching */
+}
+
+/* 2. Bind the React entry root node to full wide layout dimensions */
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
